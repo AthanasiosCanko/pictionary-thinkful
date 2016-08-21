@@ -13,7 +13,6 @@ io.on("connection", function(socket) {
 	socket.on("draw", function(position) {
 		io.emit("draw", position);
 	});
-
 });
 
 server.listen(process.env.PORT || 8080);
