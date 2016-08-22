@@ -17,6 +17,7 @@ io.on("connection", function(socket) {
 	io.emit("key", canvasKey);
 	canvasKey = false;
 	
+	
 	socket.on("draw", function(position) {
 		io.emit("draw", position);
 	});
