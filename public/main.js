@@ -30,8 +30,7 @@ $(document).ready(function() {
     		canvas.on('mouseup', function(event) {
     			drawing = false;
     		});  
-    			
-			
+    				
 		}
 		else {
 			

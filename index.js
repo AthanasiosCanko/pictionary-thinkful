@@ -8,11 +8,13 @@ app.use(express.static('public'));
 var server = http.Server(app);
 var io = socket_io(server);
 
-var canvasKey = true;
+var canvasKey = true, counter = 0;
 
 io.on("connection", function(socket) {
 	console.log("New canvas...");
 	console.log(canvasKey);
+	
+	counter += 1;
 	
 	io.emit("key", canvasKey);
 	canvasKey = false;
@@ -24,6 +26,13 @@ io.on("connection", function(socket) {
 	
 	socket.on("guess", function(guessText) {
 		io.emit("guess", guessText);
+	});
+	
+	socket.on("disconnect", function() {
+		counter -= 1;
+		if (counter === 0) {
+			canvasKey = true;
+		}
 	});
 });
 
