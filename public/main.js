@@ -2,6 +2,7 @@ var pictionary = function() {
     var canvas, context;
 	var socket = io();
 	var drawing = false;
+    var guessBox;
 	
     var draw = function(position) {
         context.beginPath();
@@ -32,7 +33,23 @@ var pictionary = function() {
     	drawing = false;
     });
     
+	var onKeyDown = function(event) {
+   		if (event.keyCode != 13) { 
+   			// Enter
+        	return;
+    	}
+
+	    socket.emit("guess", guessBox.val());
+    	guessBox.val('');
+	};
+
+	guessBox = $('#guess input');
+	
     socket.on("draw", draw);
+    socket.on("guess", function(guessText) {
+    	$("#text").append("<p>" + guessText + "</p>");
+    });
+	guessBox.on('keydown', onKeyDown);
 };
 
 $(document).ready(function() {
