@@ -8,8 +8,15 @@ app.use(express.static('public'));
 var server = http.Server(app);
 var io = socket_io(server);
 
+var canvasKey = true;
+
 io.on("connection", function(socket) {
 	console.log("New canvas...");
+	console.log(canvasKey);
+	
+	io.emit("key", canvasKey);
+	canvasKey = false;
+	
 	socket.on("draw", function(position) {
 		io.emit("draw", position);
 	});
