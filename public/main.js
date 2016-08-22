@@ -9,6 +9,7 @@ $(document).ready(function() {
 
 	socket.on("key", function(key) {
 		if (key === true) {
+			socket.emit("randomWord");
 		    $("#guess").remove();
 		    
 			var drawing = false;
@@ -30,7 +31,11 @@ $(document).ready(function() {
     		canvas.on('mouseup', function(event) {
     			drawing = false;
     		});  
-    				
+    		
+    		socket.on("randomWord", function(word) {
+    			console.log("word");
+    			$("#word").html("Word to draw: " + word);
+    		});	
 		}
 		else {
 			
@@ -57,7 +62,7 @@ $(document).ready(function() {
     		    context.fill();
     		});  
     		
-    		socket.on("guess", function(guessText) {
-   	 			$("#text").append("<p>" + guessText + "</p>");
-    		});
+    socket.on("guess", function(guessText) {
+   	 	$("#text").append("<p>" + guessText + "</p>");
+    });
 });
