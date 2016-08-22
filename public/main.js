@@ -36,10 +36,6 @@ $(document).ready(function() {
 		else {
 			
 			var guessBox = $('#guess input');
-	
-		    socket.on("guess", function(guessText) {
-   	 			$("#text").append("<p>" + guessText + "</p>");
-    		});
     		
     		var onKeyDown = function(event) {
    				if (event.keyCode != 13) {
@@ -61,4 +57,8 @@ $(document).ready(function() {
                         6, 0, 2 * Math.PI);
     		    context.fill();
     		});  
+    		
+    		socket.on("guess", function(guessText) {
+   	 			$("#text").append("<p>" + guessText + "</p>");
+    		});
 });
