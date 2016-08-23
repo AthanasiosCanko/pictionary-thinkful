@@ -10,18 +10,12 @@ $(document).ready(function() {
 
 	// We detect is a user is a drawer or guesser
 	socket.on("key", function(key) {
+		
 		if (key === true) {
 			var drawing = false;
 			
 			socket.emit("randomWord");
 		    $("#guess").remove();
-		    
-		    /* <<< BETA >>>
-		    
-		    $(".btn-warning").on("click", function() {
-		    	console.log(this.id);
-		    });
-		    */
     
     		// Mouse movement detection
 		    canvas.on('mousemove', function(event) {
@@ -84,14 +78,23 @@ $(document).ready(function() {
 	
 	// When we receive a drawing from the server, we display it to our page
 	socket.on("draw", function(position) {
-		        context.beginPath();
-        		context.arc(position.x, position.y,
-                        6, 0, 2 * Math.PI);
-    		    context.fill();
-    		});  
+		context.beginPath();
+        context.arc(position.x, position.y,
+                6, 0, 2 * Math.PI);
+    	context.fill();
+    });  
     	
     // When we receive a guess, we add it as a button for the drawer to click if correct
     socket.on("guess", function(guessText) {
-   	 	$("#text").append("<button id='" + guessText + "' class='btn btn-warning' style='width: 150px'>" + guessText + "</button><br>");
-    });
+    	var button = $("<button/>", {
+    		text: guessText,
+    		id: guessText,
+    		class: 'btn btn-warning',
+    		click: function() {
+    			console.log("Button works!");
+    		}
+    	});
+    	
+		$("#text").append(button);
+	});
 });
