@@ -1,4 +1,11 @@
 $(document).ready(function() {
+	/* <<< Throwing in some animations >>> */
+	$("h1").addClass("animated fadeInDown");
+	$("canvas").addClass("animated fadeInUp");
+	$("#top-message").addClass("animated zoomIn");
+	$("#drawOrNot").addClass("animated zoomIn");
+	$("#word").addClass("animated zoomIn");
+	
 	var socket = io();
 	var canvas, context;
 	
@@ -7,11 +14,17 @@ $(document).ready(function() {
 	context = canvas[0].getContext('2d');
 	canvas[0].width = canvas[0].offsetWidth;
     canvas[0].height = canvas[0].offsetHeight;
-
+	
 	// We detect is a user is a drawer or guesser
 	socket.on("key", function(key) {
-		
+	
+		/* <<< BETA >>> */
+		socket.on("check", function() {
+			socket.emit("drawerOnline", key);
+		});
+
 		if (key === true) {
+			
 			var drawing = false;
 			
 			socket.emit("randomWord");
@@ -61,18 +74,31 @@ $(document).ready(function() {
 		else {
 			// Guesser code
 			var guessBox = $('#guess input');
+			var guessOrNot = true;
     	
     		var onKeyDown = function(event) {
-   				if (event.keyCode != 13) {
-        			return;
-    			}
+    			if (guessOrNot === true) {
+    				
+	   				if (event.keyCode != 13) {
+    	    			return;
+    				}
 				
-				// When we hit Enter, we send the guess to the server
-			    socket.emit("guess", guessBox.val());
-    			guessBox.val('');
+					// When we hit Enter, we send the guess to the server
+				    socket.emit("guess", guessBox.val());
+    				guessBox.val('');
+    			}
 			};
-    		
-			guessBox.on('keydown', onKeyDown);
+			/*
+			socket.on("drawerLeft", function() {
+				console.log("Left...");
+			});
+    		*/
+    		guessBox.on('keydown', onKeyDown);
+			
+			socket.on('drawerWentOff', function() {
+				$("#drawOrNot").html("<p style='color: crimson'>Drawer went offline, stop guessing.</p>");
+				guessOrNot = false;
+			});
 		}
 	});
 	
@@ -89,12 +115,13 @@ $(document).ready(function() {
     	var button = $("<button/>", {
     		text: guessText,
     		id: guessText,
-    		class: 'btn btn-warning',
+    		class: 'btn btn-warning animated bounceIn',
     		click: function() {
     			console.log("Button works!");
     		}
     	});
     	
 		$("#text").append(button);
+		$("#text").append("<br><br>");
 	});
 });

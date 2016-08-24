@@ -11,9 +11,11 @@ var io = socket_io(server);
 
 // Boolean value that regulates drawer/guesser relationship
 var canvasKey = true;
+var arr = [];
 
 // Keeps count of online users
 var counter = 0;
+var isDrawerOnline = false;
 
 // Random word array
 var WORDS = [
@@ -66,7 +68,12 @@ io.on("connection", function(socket) {
 	
 	// Whenever a user disconnects, the following happens
 	socket.on("disconnect", function() {
-
+		isDrawerOnline = false;
+		
+		arr = [];
+		
+		io.emit("check");
+		
 		counter -= 1;
 			
 		io.emit("counter", counter);
@@ -74,6 +81,34 @@ io.on("connection", function(socket) {
 			canvasKey = true;
 		}
 	});
+	
+	/* <<< BETA >>> */
+	socket.on("drawerOnline", function(key) {
+		arr.push(key);
+		
+		if (arr.length === counter) {
+			console.log(arr);
+			
+			for (var i = 0; i < arr.length; i++) {
+				if (arr[i] === true) {
+					isDrawerOnline = true;
+				}
+			};
+					
+			if (isDrawerOnline === false) {
+				io.emit("drawerWentOff");
+			};
+		}
+		
+		/*
+		arr.push(val);
+		
+		for (var i = 0; i < arr.length; i++) {
+			console.log(val);
+		};
+	// console.log(val); */
+	});
 });
+
 
 server.listen(process.env.PORT || 8080);
