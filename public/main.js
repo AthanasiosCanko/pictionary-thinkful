@@ -8,6 +8,7 @@ $(document).ready(function() {
 	
 	var socket = io();
 	var canvas, context;
+	var username;
 	
 	// Setting up canvas specs
   	canvas = $('canvas');
@@ -18,13 +19,12 @@ $(document).ready(function() {
 	// We detect is a user is a drawer or guesser
 	socket.on("key", function(key) {
 	
-		/* <<< BETA >>> */
+		// Checking if drawer is online based on the key
 		socket.on("check", function() {
 			socket.emit("drawerOnline", key);
 		});
-
+		
 		if (key === true) {
-			
 			var drawing = false;
 			
 			socket.emit("randomWord");
@@ -53,6 +53,10 @@ $(document).ready(function() {
     			$("#word").html("Word to draw: " + word);
     		});	
     		
+    		socket.on("correct", function() {
+    			console.log("Correct guess!");
+    		});
+    		
     		// Keeping track of online users for the drawer
     		socket.on("counter", function(counter) {
     			if (counter === 1) {
@@ -78,23 +82,24 @@ $(document).ready(function() {
     	
     		var onKeyDown = function(event) {
     			if (guessOrNot === true) {
+    				var guess = guessBox.val();
     				
 	   				if (event.keyCode != 13) {
     	    			return;
     				}
 				
 					// When we hit Enter, we send the guess to the server
-				    socket.emit("guess", guessBox.val());
+					if (guess !== "") {
+						socket.emit("guess", guess, username);
+					}
+					
     				guessBox.val('');
     			}
 			};
-			/*
-			socket.on("drawerLeft", function() {
-				console.log("Left...");
-			});
-    		*/
+			
     		guessBox.on('keydown', onKeyDown);
 			
+			// When we detect the drawer going off, we provide a message and stop the ability to guess
 			socket.on('drawerWentOff', function() {
 				$("#drawOrNot").html("<p style='color: crimson'>Drawer went offline, stop guessing.</p>");
 				guessOrNot = false;
@@ -108,20 +113,27 @@ $(document).ready(function() {
         context.arc(position.x, position.y,
                 6, 0, 2 * Math.PI);
     	context.fill();
-    });  
+    });
     	
     // When we receive a guess, we add it as a button for the drawer to click if correct
-    socket.on("guess", function(guessText) {
+    socket.on("guess", function(guessText, username) {
     	var button = $("<button/>", {
-    		text: guessText,
-    		id: guessText,
+    		text: username + ":" + guessText,
+    		id: username,
     		class: 'btn btn-warning animated bounceIn',
     		click: function() {
-    			console.log("Button works!");
+    			// Emitting the correct guess
+    			socket.emit("correctGuess");
     		}
     	});
     	
 		$("#text").append(button);
 		$("#text").append("<br><br>");
+	});
+	
+	
+	socket.on("username", function(counter) {
+		username = "User_" + String(counter);
+		socket.emit("usernameBack", username);
 	});
 });

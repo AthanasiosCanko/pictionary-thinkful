@@ -12,9 +12,11 @@ var io = socket_io(server);
 // Boolean value that regulates drawer/guesser relationship
 var canvasKey = true;
 var arr = [];
+var user;
 
 // Keeps count of online users
 var counter = 0;
+var absoluteCounter = 0;
 var isDrawerOnline = false;
 
 // Random word array
@@ -44,6 +46,9 @@ io.on("connection", function(socket) {
 	console.log(number);
 	
 	counter += 1;
+	absoluteCounter += 1;
+	
+	socket.emit("username", absoluteCounter);
 	
 	// Emitting random array element
 	socket.on("randomWord", function() {	
@@ -62,8 +67,12 @@ io.on("connection", function(socket) {
 	});
 	
 	// Emitting guess text to all users
-	socket.on("guess", function(guessText) {
-		io.emit("guess", guessText);
+	socket.on("guess", function(guessText, username) {
+		io.emit("guess", guessText, username);
+	});
+	
+	socket.on("correctGuess", function() {
+		socket.emit("correct");
 	});
 	
 	// Whenever a user disconnects, the following happens
@@ -82,31 +91,31 @@ io.on("connection", function(socket) {
 		}
 	});
 	
-	/* <<< BETA >>> */
+	socket.on("usernameBack", function(username) {
+		user = username;
+		console.log("Username: ", user);
+	});
+	
+	// Checking if the drawer is online or not, after every received disconnection
 	socket.on("drawerOnline", function(key) {
 		arr.push(key);
 		
+		// When the array length matches the counter, execute the following code
 		if (arr.length === counter) {
 			console.log(arr);
 			
+			// We detect if the drawer is still online or not
 			for (var i = 0; i < arr.length; i++) {
 				if (arr[i] === true) {
 					isDrawerOnline = true;
 				}
 			};
 					
+			// If he isn't, we emit the following event
 			if (isDrawerOnline === false) {
 				io.emit("drawerWentOff");
 			};
 		}
-		
-		/*
-		arr.push(val);
-		
-		for (var i = 0; i < arr.length; i++) {
-			console.log(val);
-		};
-	// console.log(val); */
 	});
 });
 
