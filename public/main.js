@@ -38,7 +38,6 @@ $(document).ready(function() {
     	    		var position = {x: event.pageX - offset.left, y: event.pageY - offset.top};
 	    			socket.emit("draw", position);	
     			}
-    			
     		});
     		
     		// Function that activates mousedown actions
@@ -51,10 +50,10 @@ $(document).ready(function() {
 			// Getting a random word from the server and displaying it to the drawer
     		socket.on("randomWord", function(word) {
     			$("#word").html("Word to draw: " + word);
-    		});	
+    		});
     		
-    		socket.on("correct", function() {
-    			console.log("Correct guess!");
+    		socket.on("correct", function(user) {
+    			socket.emit("switch", user);
     		});
     		
     		// Keeping track of online users for the drawer
@@ -79,6 +78,13 @@ $(document).ready(function() {
 			// Guesser code
 			var guessBox = $('#guess input');
 			var guessOrNot = true;
+			
+			socket.on("wereYouRight", function(user) {
+				if (username === user) {
+					$("#right").html("<p style='color: green'>Your guess was correct! <br> You are now the drawer.</p>");
+					socket.emit("guesserToDrawer");
+				}
+			});
     	
     		var onKeyDown = function(event) {
     			if (guessOrNot === true) {
@@ -123,7 +129,8 @@ $(document).ready(function() {
     		class: 'btn btn-warning animated bounceIn',
     		click: function() {
     			// Emitting the correct guess
-    			socket.emit("correctGuess");
+    			socket.emit("correctGuess", username);
+    			$("#right").html("<p>You passed the drawing right to someone else. Refresh to become a guesser.");
     		}
     	});
     	

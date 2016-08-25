@@ -66,13 +66,17 @@ io.on("connection", function(socket) {
 		io.emit("draw", position);
 	});
 	
+	socket.on("guesserToDrawer", function() {
+		socket.emit("key", true);
+	});
+	
 	// Emitting guess text to all users
 	socket.on("guess", function(guessText, username) {
 		io.emit("guess", guessText, username);
 	});
 	
-	socket.on("correctGuess", function() {
-		socket.emit("correct");
+	socket.on("correctGuess", function(username) {
+		socket.emit("correct", username);
 	});
 	
 	// Whenever a user disconnects, the following happens
@@ -94,6 +98,10 @@ io.on("connection", function(socket) {
 	socket.on("usernameBack", function(username) {
 		user = username;
 		console.log("Username: ", user);
+	});
+	
+	socket.on("switch", function(user) {
+		io.emit("wereYouRight", user);
 	});
 	
 	// Checking if the drawer is online or not, after every received disconnection
